@@ -7,6 +7,8 @@ entity rsa_datapath is
     -- Clocks and resets
     clk             : in std_logic;
     reset_n         : in std_logic;
+    output_mont_ready : out std_logic;
+    enable_mont     : in std_logic;
     
     -- Data in interface       
     --msg             : in std_logic_vector (127 downto 0);
@@ -27,9 +29,9 @@ end rsa_datapath;
 
 
 architecture Behavioral of rsa_datapath is
-    
+
 signal u    : std_logic_vector(127 downto 0);
-signal state : integer := 1;       
+signal state : integer := 0;       
 
   
 begin
@@ -41,15 +43,29 @@ variable i : integer := 0;
 
    begin
    case state is 
-   when 1 =>
+   when 0 =>
+   output  <= (others => '0'); 
+   u <= (others => '0');
+          output_mont_ready<='0';
+          i  := 0;
+
+   if(clk'event and clk = '1') then
+        if(enable_mont = '1') then
+            state <= 1;
+         else
+         state <=0;
+         end if;
+    end if;
+    when 1 =>
     if(reset_n = '0') then
-    u  <= (others => '0');
-    output  <= (others => '0'); 
-    state<=1;
-    i  := 0;
+        state<=0;
     elsif(clk'event and clk = '1') then
-    
-    
+    if(enable_mont = '1') then
+        state <= 1;
+     else
+     state <=0;
+     end if;
+
     if(i<127) then
        
         if(a(i) = '1') then
@@ -72,23 +88,40 @@ variable i : integer := 0;
         end if;
         
         elsif(i=128) then
-        state <= 2;
-        if(u>=n) then
-           u <= std_logic_vector(unsigned(u) - unsigned(n));               
-        end if;
+            state <= 2;
+            if(u>=n) then
+               u <= std_logic_vector(unsigned(u) - unsigned(n));               
+            end if;
         
-    end if;
+        end if;
     i:=i+1;
     end if;
     
     when 2 =>
+     
         output <= u(127 downto 0);
-        
+        output_mont_ready<='1';
+        state <= 0;
+         
     when others =>
-        state <= 1;
+        state <= 0;
        end case;
     end process;
 
+
+
+
+      
+        
+            
+                        
+ 
+       
+
+        
+ 
+                     
+        
 
    
 end Behavioral;
