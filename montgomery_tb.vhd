@@ -32,11 +32,11 @@ use ieee.numeric_std.all;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity montgomery_tb is
+entity exp_tb is
 --  Port ( );
-end montgomery_tb;
+end exp_tb;
 
-architecture Behavioral of montgomery_tb is
+architecture Behavioral of exp_tb is
 
 
 
@@ -46,19 +46,23 @@ architecture Behavioral of montgomery_tb is
   -- Clocks and resets 
   signal clk            : std_logic := '0';
   signal reset_n        : std_logic := '0';
+  signal output_exp_ready   : std_logic := '0';
+  signal enable_exp   : std_logic := '0';
 
   -- Data input interface           
-  signal a              : std_logic_vector (127 downto 0);
-  signal b              : std_logic_vector (127 downto 0);
-  signal n              : std_logic_vector (127 downto 0);  
   signal e              : std_logic_vector (127 downto 0);
-  
-  signal output              : std_logic_vector (127 downto 0);
+  signal m              : std_logic_vector (127 downto 0);
+  signal m2              : std_logic_vector (127 downto 0);
+  signal x2              : std_logic_vector (127 downto 0);  
+  signal n              : std_logic_vector (127 downto 0);
+  signal output_exp    : std_logic_vector(127 downto 0);
+
+
 
 begin
 
   -- DUT instantiation
-  dut: entity work.rsa_datapath 
+  dut: entity work.mont_exp 
     port map (
     
       -- Clocks and resets 
@@ -66,12 +70,15 @@ begin
       reset_n        => reset_n, 
   
       -- Data input interface           
-      a => a,
-      b => b,
-      e => e,
-      
-      output => output,
-      n => n
+      output_exp_ready  => output_exp_ready,
+      enable_exp  => enable_exp,
+       e=>e,
+       m=>m,
+       m2=>m2,
+       x2=>x2,
+       n=>n,
+       output_exp=>output_exp
+     
          
     );
 
@@ -90,16 +97,16 @@ begin
   -- Stimuli generation
   stimuli_proc: process
   begin
-  a <= x"00000000000000000000000000000000";
-      b <= x"00000000000000000000000000000000";
+
     -- Send in first test vector
     wait for 2*CLK_PERIOD;
     
-    n <= x"00000000000000000000000000000010";
-    e <= x"00000000000000000000000000000003";
-    a <= x"00000000000000000000000000000003";
-    b <= x"00000000000000000000000000000003";
-    
+    n <= x"00000000000000000000000000000077";
+    e <= x"00000000000000000000000000000005";
+    m <= x"00000000000000000000000000000013";
+    m2<= x"00000000000000000000000000000034";
+    x2<= x"00000000000000000000000000000009";
+    enable_exp <= '1';
    
     
     -- Wait for results
