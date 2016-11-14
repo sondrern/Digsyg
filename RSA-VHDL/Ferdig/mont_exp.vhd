@@ -68,7 +68,7 @@ type state is (idle, mont1, mont2, mont3, finish, decrement, start, state2, stat
 signal pre_state : state;       
 begin
 
-  rsa_datapath : entity work.rsa_datapath port map(
+  monpro : entity work.monpro port map(
   -- Clocks and resets
     clk             => clk,
     reset_n         => reset_n,
